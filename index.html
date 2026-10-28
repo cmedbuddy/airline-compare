@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空の旅 - 機票價格比較</title>
+    <!-- Google Fonts: Noto Serif JP & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-paper: #F9F8F6;
+            --card-bg: #FFFFFF;
+            --text-main: #2D2C2A;
+            --text-sub: #73706B;
+            --accent-sage: #6B7C6A;
+            --accent-sage-light: #F0F3F0;
+            --accent-sage-dark: #4F5D4E;
+            --accent-gold: #C5A059;
+            --border-color: #EBE8E3;
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.04);
+            --radius-main: 16px;
+            --radius-btn: 12px;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Noto Serif JP', -apple-system, sans-serif;
+            color: var(--text-main);
+        }
+
+        body {
+            background-color: var(--bg-paper);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header .logo-sub {
+            font-size: 0.85rem;
+            letter-spacing: 0.25em;
+            color: var(--accent-sage);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        header h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2.2rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        .search-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-main);
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        /* 模式切換標籤 */
+        .tab-group {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-radius: 20px;
+            color: var(--text-sub);
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-sage-light);
+            color: var(--accent-sage-dark);
+            font-weight: 600;
+        }
+
+        .trip-type-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+            background: var(--bg-paper);
+            padding: 4px;
+            border-radius: 20px;
+        }
+
+        .trip-type-btn {
+            border: none;
+            background: none;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .trip-type-btn.active {
+            background: #FFF;
+            color: var(--text-main);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .input-style {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-btn);
+            background: var(--bg-paper);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-style:focus {
+            border-color: var(--accent-sage);
+            background: #FFF;
+        }
+
+        .btn-search {
+            background: var(--accent-sage);
+            color: #FFF;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--radius-btn);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn-search:hover {
+            background: var(--accent-sage-dark);
+            transform: translateY(-1px);
+        }
+
+        /* 彈性日期矩陣 */
+        .flex-matrix-section {
+            background: var(--card-bg);
+            border-radius: var(--radius-main);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .section-title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(11, minmax(80px, 1fr));
+            gap: 0.5rem;
+            text-align: center;
+            min-width: 800px;
+        }
+
+        .matrix-cell {
+            padding: 0.75rem 0.25rem;
+            border-radius: 10px;
+            background: var(--bg-paper);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .matrix-cell:hover {
+            border-color: var(--accent-sage);
+            background: #FFF;
+        }
+
+        .matrix-cell.active {
+            background: var(--accent-sage-light);
+            border-color: var(--accent-sage);
+        }
+
+        .matrix-cell.cheapest {
+            border: 1px solid var(--accent-gold);
+            background: #FFFDF7;
+        }
+
+        .matrix-cell .date-str {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-bottom: 0.25rem;
+        }
+
+        .matrix-cell .price-str {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .matrix-cell.cheapest .price-str {
+            color: #B38226;
+        }
+
+        /* 結果列表 */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .flight-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-main);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            gap: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .flight-card:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+
+        .airline-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .airline-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-paper);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--accent-sage-dark);
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .flight-time-line {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .time-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .time {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .city {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .duration-tag {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            background: var(--bg-paper);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .price-box {
+            text-align: right;
+        }
+
+        .price-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .price-unit {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .btn-book {
+            background: var(--accent-sage-light);
+            color: var(--accent-sage-dark);
+            border: 1px solid var(--accent-sage);
+            padding: 0.65rem 1.2rem;
+            border-radius: var(--radius-btn);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-book:hover {
+            background: var(--accent-sage);
+            color: #FFF;
+        }
+
+        @media (max-width: 768px) {
+            .flight-card {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .price-box {
+                text-align: left;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-sub">FLIGHT COMPARISON</div>
+        <h1>空の旅・機票比價</h1>
+    </header>
+
+    <!-- 搜尋卡片 -->
+    <div class="search-card">
+        <div class="tab-group">
+            <button class="tab-btn active" id="tab-specific" onclick="switchMode('specific')">指定地點</button>
+            <button class="tab-btn" id="tab-anywhere" onclick="switchMode('anywhere')">🌸 日本哪裡都可以</button>
+
+            <div class="trip-type-group">
+                <button class="trip-type-btn active" id="type-round" onclick="setTripType('round')">來回</button>
+                <button class="trip-type-btn" id="type-oneaway" onclick="setTripType('oneway')">單程</button>
+            </div>
+        </div>
+
+        <form id="search-form" onsubmit="handleSearch(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>出發地</label>
+                    <select id="origin" class="input-style">
+                        <option value="HKG" selected>香港 (HKG)</option>
+                        <option value="TPE">台北 (TPE)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="dest-group">
+                    <label>目的地</label>
+                    <select id="destination" class="input-style">
+                        <option value="TYO">東京 (ALL)</option>
+                        <option value="OSA">大阪 (ALL)</option>
+                        <option value="CTS">札幌/北海道 (CTS)</option>
+                        <option value="FUK">福岡 (FUK)</option>
+                        <option value="OKA">沖繩 (OKA)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>去程日期</label>
+                    <input type="date" id="depart-date" class="input-style" required>
+                </div>
+
+                <div class="form-group" id="return-date-group">
+                    <label>回程日期</label>
+                    <input type="date" id="return-date" class="input-style">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-search">搜尋實時比價</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ±5日彈性價格矩陣 -->
+    <div class="flex-matrix-section" id="matrix-section">
+        <div class="section-title">
+            <span>📅</span> 去程前後 ±5 日彈性票價比較 (估計)
+        </div>
+        <div class="matrix-grid" id="matrix-grid"></div>
+    </div>
+
+    <!-- 搜尋結果 -->
+    <div class="results-section" id="results-list"></div>
+</div>
+
+<script>
+    let searchMode = 'specific'; // 'specific' 或 'anywhere'
+    let tripType = 'round';     // 'round' 或 'oneway'
+
+    // 日本熱門目的地列表
+    const JAPAN_DESTINATIONS = [
+        { code: 'TYO', name: '東京', nameEn: 'Tokyo', basePrice: 2400 },
+        { code: 'OSA', name: '大阪', nameEn: 'Osaka', basePrice: 2200 },
+        { code: 'FUK', name: '福岡', nameEn: 'Fukuoka', basePrice: 1950 },
+        { code: 'OKA', name: '沖繩', nameEn: 'Okinawa', basePrice: 1680 },
+        { code: 'CTS', name: '札幌', nameEn: 'Sapporo', basePrice: 3100 }
+    ];
+
+    // 預設日期設定
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const nextMonth = new Date(today);
+        nextMonth.setDate(today.getDate() + 30);
+        
+        const returnDay = new Date(nextMonth);
+        returnDay.setDate(nextMonth.getDate() + 5);
+
+        document.getElementById('depart-date').value = formatDate(nextMonth);
+        document.getElementById('return-date').value = formatDate(returnDay);
+        
+        runSearch();
+    });
+
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    function switchMode(mode) {
+        searchMode = mode;
+        document.getElementById('tab-specific').classList.toggle('active', mode === 'specific');
+        document.getElementById('tab-anywhere').classList.toggle('active', mode === 'anywhere');
+        
+        const destGroup = document.getElementById('dest-group');
+        destGroup.style.display = (mode === 'anywhere') ? 'none' : 'flex';
+        runSearch();
+    }
+
+    function setTripType(type) {
+        tripType = type;
+        document.getElementById('type-round').classList.toggle('active', type === 'round');
+        document.getElementById('type-oneaway').classList.toggle('active', type === 'oneway');
+        
+        const returnGroup = document.getElementById('return-date-group');
+        returnGroup.style.display = (type === 'oneway') ? 'none' : 'flex';
+        runSearch();
+    }
+
+    function handleSearch(e) {
+        e.preventDefault();
+        runSearch();
+    }
+
+    // 核心搜尋與計算
+    function runSearch() {
+        const origin = document.getElementById('origin').value;
+        const dest = document.getElementById('destination').value;
+        const departDate = document.getElementById('depart-date').value;
+        const returnDate = document.getElementById('return-date').value;
+
+        renderMatrix(departDate);
+
+        if (searchMode === 'specific') {
+            renderSpecificResults(origin, dest, departDate, returnDate);
+        } else {
+            renderAnywhereResults(origin, departDate, returnDate);
+        }
+    }
+
+    // 生成 Google Flights 真實官網 URL
+    function buildGoogleFlightsUrl(origin, dest, departDate, returnDate) {
+        const query = (tripType === 'round' && returnDate)
+            ? `Flights from ${origin} to ${dest} on ${departDate} returning ${returnDate}`
+            : `Flights from ${origin} to ${dest} on ${departDate}`;
+        return `https://www.google.com/travel/flights?q=${encodeURIComponent(query)}&curr=HKD&hl=zh-HK`;
+    }
+
+    // 渲染 ±5 日矩陣
+    function renderMatrix(centerDateStr) {
+        const grid = document.getElementById('matrix-grid');
+        grid.innerHTML = '';
+        const centerDate = new Date(centerDateStr);
+        
+        let lowestPrice = Infinity;
+        let lowestIndex = -1;
+        const matrixData = [];
+
+        for (let i = -5; i <= 5; i++) {
+            const d = new Date(centerDate);
+            d.setDate(centerDate.getDate() + i);
+            
+            // 價格模擬計算 (基於週日與淡旺季)
+            const dayOfWeek = d.getDay();
+            let factor = (dayOfWeek === 5 || dayOfWeek === 6) ? 1.25 : 0.95;
+            let mockPrice = Math.round(1850 * factor + (Math.abs(i) * 40));
+
+            if (mockPrice < lowestPrice) {
+                lowestPrice = mockPrice;
+                lowestIndex = i + 5;
+            }
+
+            matrixData.push({
+                dateStr: `${d.getMonth() + 1}/${d.getDate()}`,
+                fullDate: formatDate(d),
+                price: mockPrice,
+                offset: i
+            });
+        }
+
+        matrixData.forEach((item, idx) => {
+            const cell = document.createElement('div');
+            cell.className = `matrix-cell ${item.offset === 0 ? 'active' : ''} ${idx === lowestIndex ? 'cheapest' : ''}`;
+            cell.onclick = () => {
+                document.getElementById('depart-date').value = item.fullDate;
+                if(tripType === 'round') {
+                    // 自動順延回程日期
+                    const newRet = new Date(item.fullDate);
+                    newRet.setDate(newRet.getDate() + 5);
+                    document.getElementById('return-date').value = formatDate(newRet);
+                }
+                runSearch();
+            };
+
+            cell.innerHTML = `
+                <div class="date-str">${item.dateStr} (${['日','一','二','三','四','五','六'][new Date(item.fullDate).getDay()]})</div>
+                <div class="price-str">HK$${item.price.toLocaleString()}</div>
+            `;
+            grid.appendChild(cell);
+        });
+    }
+
+    // 指定地點搜尋結果
+    function renderSpecificResults(origin, dest, departDate, returnDate) {
+        const container = document.getElementById('results-list');
+        container.innerHTML = '';
+
+        const airlines = [
+            { name: '香港快運', code: 'UO', timeOut: '07:55 - 13:15', timeIn: '14:15 - 18:00', duration: '4h 20m', price: 1680 },
+            { name: '大灣區航空', code: 'HB', timeOut: '09:25 - 14:45', timeIn: '15:45 - 19:30', duration: '4h 20m', price: 1850 },
+            { name: '國泰航空', code: 'CX', timeOut: '10:20 - 15:35', timeIn: '16:50 - 21:00', duration: '4h 15m', price: 3120 },
+            { name: '全日空 ANA', code: 'NH', timeOut: '14:30 - 19:40', timeIn: '08:50 - 12:55', duration: '4h 10m', price: 3890 }
+        ];
+
+        airlines.forEach(a => {
+            const realUrl = buildGoogleFlightsUrl(origin, dest, departDate, returnDate);
+            const card = document.createElement('div');
+            card.className = 'flight-card';
+            card.innerHTML = `
+                <div class="airline-info">
+                    <div class="airline-icon">${a.code}</div>
+                    <div>
+                        <strong style="font-size:1.05rem">${a.name}</strong>
+                        <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">直飛 • 經濟艙</div>
+                    </div>
+                </div>
+
+                <div class="flight-time-line">
+                    <div class="time-row">
+                        <span class="time">${a.timeOut.split(' - ')[0]}</span>
+                        <span class="duration-tag">${a.duration}</span>
+                        <span class="time">${a.timeOut.split(' - ')[1]}</span>
+                    </div>
+                    ${tripType === 'round' ? `
+                    <div class="time-row" style="opacity: 0.75;">
+                        <span class="time" style="font-size:0.95rem">${a.timeIn.split(' - ')[0]}</span>
+                        <span class="duration-tag">回程</span>
+                        <span class="time" style="font-size:0.95rem">${a.timeIn.split(' - ')[1]}</span>
+                    </div>` : ''}
+                </div>
+
+                <div class="price-box">
+                    <div class="price-amount">HK$ ${a.price.toLocaleString()}</div>
+                    <div class="price-unit">${tripType === 'round' ? '來回含稅估價' : '單程含稅估價'}</div>
+                    <a href="${realUrl}" target="_blank" class="btn-book" style="margin-top:0.5rem;">前往 Google 官網查價</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // 日本哪裡都行搜尋結果
+    function renderAnywhereResults(origin, departDate, returnDate) {
+        const container = document.getElementById('results-list');
+        container.innerHTML = '<h3 style="font-family:\'Noto Serif JP\'; margin-bottom:0.5rem;">🌸 日本各城市最低價推薦</h3>';
+
+        JAPAN_DESTINATIONS.forEach(dest => {
+            const realUrl = buildGoogleFlightsUrl(origin, dest.code, departDate, returnDate);
+            const card = document.createElement('div');
+            card.className = 'flight-card';
+            card.innerHTML = `
+                <div class="airline-info">
+                    <div class="airline-icon" style="background:var(--accent-sage-light)">${dest.code}</div>
+                    <div>
+                        <strong style="font-size:1.1rem">${dest.name} (${dest.nameEn})</strong>
+                        <div style="font-size:0.8rem; color:var(--text-sub); margin-top:2px;">最快直飛約 3.5 - 4.5 小時</div>
+                    </div>
+                </div>
+
+                <div>
+                    <span style="font-size:0.85rem; color:var(--text-sub);">出發日期：${departDate}</span>
+                    ${tripType === 'round' ? `<br><span style="font-size:0.85rem; color:var(--text-sub);">回程日期：${returnDate}</span>` : ''}
+                </div>
+
+                <div class="price-box">
+                    <div class="price-amount" style="color:var(--accent-sage-dark)">HK$ ${dest.basePrice.toLocaleString()} <span style="font-size:0.8rem;font-weight:normal">起</span></div>
+                    <a href="${realUrl}" target="_blank" class="btn-book" style="margin-top:0.5rem;">查看${dest.name}實時機票</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>
